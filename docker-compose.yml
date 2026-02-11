@@ -7,8 +7,12 @@ services:
       - .env
     environment:
       - RUN_IMPORT=0
+      - LIMITER_STORAGE_URI=redis://redis:6379/0
+      - REDIS_CACHE_URL=redis://redis:6379/1
+      - RESULTS_CACHE_TTL=10
     depends_on:
       - importer
+      - redis
 
   importer:
     build: ./backend
@@ -20,6 +24,13 @@ services:
     volumes:
       - ./assets/bd_elections_2026_candidates.csv:/data/bd_elections_2026_candidates.csv:ro
     restart: "no"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
 
   frontend:
     build: ./frontend

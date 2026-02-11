@@ -8,6 +8,8 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from pymongo import ReturnDocument
 from pymongo.errors import DuplicateKeyError
+import json
+import redis
 
 from config import load_config
 from db import get_db, ensure_indexes
@@ -41,10 +43,21 @@ def create_app():
     app.config["JSON_SORT_KEYS"] = False
 
     CORS(app, origins=[cfg.frontend_origin], supports_credentials=True)
-    limiter = Limiter(get_remote_address, app=app, default_limits=[])
+    limiter = Limiter(
+        get_remote_address,
+        app=app,
+        default_limits=[],
+        storage_uri=cfg.limiter_storage_uri,
+    )
 
     db = get_db(cfg.mongo_uri, cfg.db_name)
     ensure_indexes(db)
+    cache = None
+    try:
+        cache = redis.Redis.from_url(cfg.redis_cache_url, decode_responses=True)
+        cache.ping()
+    except Exception:
+        cache = None
 
     def ensure_vid_cookie(resp):
         vid = request.cookies.get("vid")
@@ -209,6 +222,11 @@ def create_app():
             upsert=True,
             return_document=ReturnDocument.AFTER,
         )
+        if cache:
+            try:
+                cache.delete("results_overall")
+            except Exception:
+                pass
 
         payload = constituency_payload(constituency_no)
         resp = make_response(jsonify({
@@ -222,6 +240,15 @@ def create_app():
 
     @app.get("/api/results/overall")
     def results_overall():
+        if cache:
+            try:
+                cached = cache.get("results_overall")
+                if cached:
+                    resp = make_response(cached)
+                    resp.mimetype = "application/json"
+                    return ensure_vid_cookie(resp)
+            except Exception:
+                pass
         constituencies = list(db.constituencies.find({}, {"_id": 0}))
         tallies = list(db.tallies.find({}, {"_id": 0}))
 
@@ -279,8 +306,21 @@ def create_app():
                 "is_tied": False,
             }
 
+        top_seats = []
+        for c in constituencies:
+            totals = tally_map.get(c.get("constituency_no"), {})
+            total_votes = sum(totals.values()) if totals else 0
+            top_seats.append({
+                "constituency_no": c.get("constituency_no"),
+                "seat": c.get("seat"),
+                "division": c.get("division"),
+                "total_votes": total_votes,
+            })
+        top_seats.sort(key=lambda x: x.get("total_votes", 0), reverse=True)
+        top_seats = top_seats[:10]
+
         total_votes = sum(votes_by_party.values())
-        resp = make_response(jsonify({
+        payload = {
             "total_votes": total_votes,
             "votes_by_alliance": votes_by_alliance,
             "votes_by_party": votes_by_party,
@@ -297,8 +337,16 @@ def create_app():
             "constituencies_count": len(constituencies),
             "disabled_count": disabled_count,
             "leaders_by_constituency": leaders_by_constituency,
+            "top_seats_by_votes": top_seats,
             "updated_at": now_utc().isoformat(),
-        }))
+        }
+        if cache:
+            try:
+                cache.setex("results_overall", cfg.results_cache_ttl, json.dumps(payload))
+            except Exception:
+                pass
+        resp = make_response(json.dumps(payload))
+        resp.mimetype = "application/json"
         return ensure_vid_cookie(resp)
 
     return app

@@ -27,6 +27,7 @@ This runs:
 - `importer` one-shot service to load `bd_elections_2026_candidates.csv` into MongoDB
 - `backend` with Gunicorn on `http://localhost:8000`
 - `frontend` via Nginx on `http://localhost:5173`
+- `redis` for rate limiting
 
 ## Local Dev (Optional)
 

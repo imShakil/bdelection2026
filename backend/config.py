@@ -12,6 +12,9 @@ class Config:
     captcha_secret_key: str
     captcha_site_key: str
     secure_cookies: bool
+    limiter_storage_uri: str
+    redis_cache_url: str
+    results_cache_ttl: int
 
 
 def load_config() -> Config:
@@ -24,4 +27,7 @@ def load_config() -> Config:
         captcha_secret_key=os.environ.get("CAPTCHA_SECRET_KEY", ""),
         captcha_site_key=os.environ.get("CAPTCHA_SITE_KEY", ""),
         secure_cookies=os.environ.get("SECURE_COOKIES", "false").lower() == "true",
+        limiter_storage_uri=os.environ.get("LIMITER_STORAGE_URI", "memory://"),
+        redis_cache_url=os.environ.get("REDIS_CACHE_URL", "redis://redis:6379/1"),
+        results_cache_ttl=int(os.environ.get("RESULTS_CACHE_TTL", "10")),
     )
