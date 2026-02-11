@@ -19,6 +19,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install rsync on runner
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rsync
+
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -31,6 +36,7 @@ jobs:
 
       - name: Sync repo to VM
         run: |
+          ssh ${{ secrets.SSH_USER }}@${{ env.GCP_VM_HOST }} "sudo apt-get update && sudo apt-get install -y rsync"
           ssh ${{ secrets.SSH_USER }}@${{ env.GCP_VM_HOST }} "mkdir -p ${{ env.GCP_APP_PATH }}"
           rsync -az --delete \
             --exclude ".git" \
