@@ -64,6 +64,11 @@ a { color: inherit; text-decoration: none; }
   color: #ffffff;
 }
 
+.nav a {
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
 .app-main {
   padding: 24px 28px 40px;
 }
@@ -80,6 +85,12 @@ a { color: inherit; text-decoration: none; }
   flex-wrap: wrap;
   color: var(--muted);
   font-size: 12px;
+}
+
+@media (max-width: 720px) {
+  .app-footer {
+    padding: 16px;
+  }
 }
 
 .footer-left {
@@ -106,6 +117,85 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 960px) {
   .page-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 16px;
+  }
+  .nav {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .lang-toggle {
+    margin-left: 0;
+  }
+  .app-main {
+    padding: 16px 16px 28px;
+  }
+  .card {
+    padding: 14px;
+  }
+  .stats-grid,
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .sticky-column {
+    position: static;
+  }
+  .candidate-list {
+    max-height: none !important;
+  }
+  .donut-wrap {
+    margin: 10px auto 0;
+  }
+  .bar-label {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  .brand-title {
+    font-size: 18px;
+  }
+  .brand-sub {
+    font-size: 11px;
+  }
+  .panel-title {
+    font-size: 15px;
+  }
+  .panel-sub {
+    font-size: 12px;
+  }
+  .candidate-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .candidate-row span:last-child {
+    align-self: flex-end;
+  }
+  .vote-btn {
+    font-size: 14px;
+    padding: 12px 14px;
+  }
+  .input {
+    font-size: 13px;
+  }
+  .stat-value {
+    font-size: 20px;
+  }
+  .kpi-value {
+    font-size: 18px;
+  }
+  .footer-right {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
