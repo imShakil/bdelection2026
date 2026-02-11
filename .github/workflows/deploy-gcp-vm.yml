@@ -1,0 +1,47 @@
+name: Deploy to GCP VM
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ./backend
+      - ./frontend
+      - ./docker-compose.yml
+  workflow_dispatch:
+
+env:
+  GCP_APP_PATH: /home/${{ secrets.SSH_USER }}/bd-elections-2026
+  GCP_VM_HOST: "34.87.136.129"
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ env.GCP_VM_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Sync repo to VM
+        run: |
+          rsync -az --delete \
+            --exclude ".git" \
+            --exclude "node_modules" \
+            --exclude "backend/.venv" \
+            ./ ${{ secrets.SSH_USER }}@${{ env.GCP_VM_HOST }}:${{ env.GCP_APP_PATH }}
+
+      - name: Deploy on VM
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ env.GCP_VM_HOST }} << 'EOF'
+            set -e
+            cd ${{ env.GCP_APP_PATH }}
+            docker compose pull || true
+            docker compose up --build -d
+          EOF
