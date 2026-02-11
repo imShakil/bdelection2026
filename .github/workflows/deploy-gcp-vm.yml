@@ -31,6 +31,7 @@ jobs:
 
       - name: Sync repo to VM
         run: |
+          ssh ${{ secrets.SSH_USER }}@${{ env.GCP_VM_HOST }} "mkdir -p ${{ env.GCP_APP_PATH }}"
           rsync -az --delete \
             --exclude ".git" \
             --exclude "node_modules" \
