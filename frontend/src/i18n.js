@@ -1,5 +1,5 @@
-const translations = Object.freeze({
-  en: Object.freeze({
+const translations = {
+  en: {
     nav_vote: 'Vote',
     nav_stats: 'Stats',
     nav_news: 'Election News',
@@ -46,8 +46,8 @@ const translations = Object.freeze({
     news_disclaimer: 'Sources are external news outlets. This is a demo view only.',
     news_fun: 'Civic Tip',
     news_tip: 'Learn about candidates, compare policies, and vote for what is best for the country.'
-  }),
-  bn: Object.freeze({
+  },
+  bn: {
     nav_vote: 'ভোট',
     nav_stats: 'পরিসংখ্যান',
     nav_news: 'নির্বাচনীয় সংবাদ',
@@ -104,8 +104,8 @@ const translations = Object.freeze({
     stats_seats_by_party: 'দলভিত্তিক লিডিং আসন',
     loading_candidates: 'প্রার্থীদের তালিকা লোড হচ্ছে…',
     loading: 'লোড হচ্ছে…'
-  })
-})
+  }
+}
 
 export function getLang() {
   return localStorage.getItem('lang') || 'bn'
