@@ -24,10 +24,12 @@ function AppShell() {
     <BrowserRouter>
       <div className="app-shell">
         <header className="app-header">
-          <div className="brand">
-            <div className="brand-title">{t(lang, 'brand_title')}</div>
-            <div className="brand-sub">{t(lang, 'brand_sub')}</div>
-          </div>
+          <Link to="/">
+            <div className="brand">
+              <div className="brand-title">{t(lang, 'brand_title')}</div>
+              <div className="brand-sub">{t(lang, 'brand_sub')}</div>
+            </div>
+          </Link>
           <nav className="nav">
             <Link to="/">{labels.vote}</Link>
             <Link to="/stats">{labels.stats}</Link>

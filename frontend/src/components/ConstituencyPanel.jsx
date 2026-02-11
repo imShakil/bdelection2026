@@ -12,9 +12,9 @@ export default function ConstituencyPanel({ constituency, selectedCandidate, onS
 
   return (
     <div className="card">
-      <div className="panel-title">{constituency.seat}</div>
+      <div className="panel-title">{lang === 'bn' && constituency.seat_bn ? constituency.seat_bn : constituency.seat}</div>
       <div className="panel-sub">
-        {constituency.division} · Constituency #{constituency.constituency_no}
+        {(lang === 'bn' && constituency.division_bn ? constituency.division_bn : constituency.division)} · Constituency #{constituency.constituency_no}
       </div>
       {constituency.notes ? (
         <div className="notice">{constituency.notes}</div>
@@ -30,7 +30,7 @@ export default function ConstituencyPanel({ constituency, selectedCandidate, onS
                 checked={selectedCandidate === c.candidate_id}
                 onChange={() => onSelectCandidate(c.candidate_id)}
               />{' '}
-              {c.name} <span className="small">({c.party})</span>
+              {(lang === 'bn' && c.name_bn ? c.name_bn : c.name)} <span className="small">({(lang === 'bn' && c.party_bn ? c.party_bn : c.party)})</span>
             </span>
             <span>{totals?.[c.candidate_id] || 0}</span>
           </label>

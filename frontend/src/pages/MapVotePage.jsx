@@ -83,7 +83,12 @@ export default function MapVotePage({ lang }) {
 
   const filtered = useMemo(() => {
     if (!query) return constituencies
-    return constituencies.filter((c) => c.seat.toLowerCase().includes(query.toLowerCase()))
+    return constituencies.filter((c) => {
+      const seat = (c.seat || '').toLowerCase()
+      const seatBn = (c.seat_bn || '').toLowerCase()
+      const q = query.toLowerCase()
+      return seat.includes(q) || seatBn.includes(q)
+    })
   }, [query, constituencies])
 
   const voteDisabled = !selectedDetail || !selectedCandidate
@@ -132,7 +137,7 @@ export default function MapVotePage({ lang }) {
               style={{ cursor: 'pointer', background: selectedId === c.constituency_no ? '#eef3fb' : '#fff' }}
               onClick={() => setSelectedId(c.constituency_no)}
             >
-              <span>{c.seat}</span>
+              <span>{lang === 'bn' && c.seat_bn ? c.seat_bn : c.seat}</span>
               <span>#{c.constituency_no}</span>
             </button>
           ))}
@@ -177,11 +182,11 @@ export default function MapVotePage({ lang }) {
           <div className="step-row"><span className="step-dot"></span>{t(lang, 'vote_step2')}</div>
           <div className="step-row"><span className="step-dot"></span>{t(lang, 'vote_step3')}</div>
         </div>
-        <div className="notice" style={{ marginTop: 16 }}>
+        <ResultSummary seat={selectedDetail} totals={totals} lang={lang} />
+         <div className="notice" style={{ marginTop: 16 }}>
           <strong>{t(lang, 'vote_notice_title')}</strong>
           <div className="small" style={{ marginTop: 6 }}>{t(lang, 'vote_notice_text')}</div>
         </div>
-        <ResultSummary seat={selectedDetail} totals={totals} lang={lang} />
       </div>
     </div>
   )

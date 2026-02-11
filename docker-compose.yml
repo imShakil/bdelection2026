@@ -24,8 +24,10 @@ services:
       - RUN_IMPORT=1
       - MONGODB_URI=mongodb://mongo:27017/bd_elections_2026
       - CANDIDATES_CSV=/data/bd_elections_2026_candidates.csv
+      - CANDIDATES_BN_CSV=/data/bd_candidates_bn.csv
     volumes:
-      - ./assets/bd_elections_2026_candidates.csv:/data/bd_elections_2026_candidates.csv:ro
+      - ./bd_elections_2026_candidates.csv:/data/bd_elections_2026_candidates.csv:ro
+      - ./bd_candidates_bn.csv:/data/bd_candidates_bn.csv:ro
     restart: "no"
     depends_on:
       - redis
@@ -46,8 +48,8 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "80:80"
-      - "443:443"
+      - "7082:80"
+      - "9443:443"
     volumes:
       - ./certs:/etc/nginx/certs:ro
     depends_on:

@@ -70,6 +70,56 @@ function BarList({ title, data }) {
   )
 }
 
+function DonutChart({ title, data, lang }) {
+  const entries = Object.entries(data || {}).filter(([, v]) => v > 0)
+  if (!entries.length) {
+    return (
+      <div className="stat-card">
+        <h3>{title}</h3>
+        <div className="small" style={{ marginTop: 8 }}>{t(lang, 'stats_novotes')}</div>
+      </div>
+    )
+  }
+
+  const total = entries.reduce((sum, [, v]) => sum + v, 0)
+  const radius = 52
+  const circumference = 2 * Math.PI * radius
+  let offset = 0
+
+  return (
+    <div className="stat-card">
+      <h3>{title}</h3>
+      <div className="donut-wrap">
+        <svg width="140" height="140" viewBox="0 0 140 140" className="donut">
+          <circle cx="70" cy="70" r={radius} className="donut-track" />
+          {entries.map(([key, value]) => {
+            const dash = (value / total) * circumference
+            const style = {
+              stroke: PARTY_COLORS[key] || '#5b6066',
+              strokeDasharray: `${dash} ${circumference - dash}`,
+              strokeDashoffset: -offset
+            }
+            offset += dash
+            return <circle key={key} cx="70" cy="70" r={radius} className="donut-seg" style={style} />
+          })}
+        </svg>
+        <div className="donut-center">
+          <div className="donut-total">{total}</div>
+          <div className="small">{t(lang, 'stats_total_votes')}</div>
+        </div>
+      </div>
+      <div className="legend compact" style={{ marginTop: 10 }}>
+        {entries.map(([label]) => (
+          <div key={label} className="legend-item">
+            <span className="legend-swatch" style={{ background: PARTY_COLORS[label] || '#5b6066' }}></span>
+            <span>{label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function SeatResult({ seat, totals, loading, lang }) {
   if (loading) {
     return (
@@ -86,15 +136,15 @@ function SeatResult({ seat, totals, loading, lang }) {
   return (
     <div className="stat-card">
       <h3>{t(lang, 'stats_seat_result')}</h3>
-      <div className="panel-title" style={{ marginBottom: 6 }}>{seat.seat}</div>
-      <div className="panel-sub">{seat.division} · Constituency #{seat.constituency_no}</div>
+      <div className="panel-title" style={{ marginBottom: 6 }}>{lang === 'bn' && seat.seat_bn ? seat.seat_bn : seat.seat}</div>
+      <div className="panel-sub">{(lang === 'bn' && seat.division_bn ? seat.division_bn : seat.division)} · Constituency #{seat.constituency_no}</div>
       <div className="candidate-list" style={{ marginTop: 10 }}>
         {(seat.candidates || []).map((c) => {
           const value = totals?.[c.candidate_id] || 0
           const width = maxVotes ? Math.round((value / maxVotes) * 100) : 0
           return (
             <div className="candidate-row" key={c.candidate_id}>
-              <span>{c.name} <span className="small">({c.party})</span></span>
+              <span>{(lang === 'bn' && c.name_bn ? c.name_bn : c.name)} <span className="small">({(lang === 'bn' && c.party_bn ? c.party_bn : c.party)})</span></span>
               <span>{value}</span>
               <div className="bar">
                 <div className="bar-fill" style={{ width: `${width}%` }}></div>
@@ -163,7 +213,12 @@ export default function StatsPage({ lang }) {
 
   const filtered = useMemo(() => {
     if (!query) return constituencies
-    return constituencies.filter((c) => c.seat.toLowerCase().includes(query.toLowerCase()))
+    return constituencies.filter((c) => {
+      const seat = (c.seat || '').toLowerCase()
+      const seatBn = (c.seat_bn || '').toLowerCase()
+      const q = query.toLowerCase()
+      return seat.includes(q) || seatBn.includes(q)
+    })
   }, [query, constituencies])
 
   if (!stats && loadingStats) {
@@ -208,6 +263,16 @@ export default function StatsPage({ lang }) {
         </div>
       </div>
 
+      <div className="stats-grid" style={{ marginBottom: 18 }}>
+        <BarList title={t(lang, 'stats_votes_by_alliance')} data={stats?.votes_by_alliance} />
+        <DonutChart title={t(lang, 'stats_votes_by_party')} data={stats?.votes_by_party} lang={lang} />
+      </div>
+
+      <div className="stats-grid">
+        <StatList title={t(lang, 'stats_seats_by_alliance')} data={stats?.seats_leading_by_alliance} />
+        <StatList title={t(lang, 'stats_seats_by_party')} data={stats?.seats_leading_by_party} />
+      </div>
+
       <div className="page-grid" style={{ marginBottom: 18 }}>
         <div className="card">
           <div className="panel-title">{t(lang, 'stats_search_title')}</div>
@@ -231,7 +296,7 @@ export default function StatsPage({ lang }) {
                 style={{ cursor: 'pointer', background: selectedId === c.constituency_no ? '#eef3fb' : '#fff' }}
                 onClick={() => setSelectedId(c.constituency_no)}
               >
-                <span>{c.seat}</span>
+                <span>{lang === 'bn' && c.seat_bn ? c.seat_bn : c.seat}</span>
                 <span>#{c.constituency_no}</span>
               </button>
             ))}
@@ -257,21 +322,20 @@ export default function StatsPage({ lang }) {
         )}
       </div>
 
-      <div className="stats-grid" style={{ marginBottom: 18 }}>
-        <BarList title={t(lang, 'stats_votes_by_alliance')} data={stats?.votes_by_alliance} />
-        <BarList title={t(lang, 'stats_votes_by_party')} data={stats?.votes_by_party} />
-      </div>
 
       <div className="stats-grid" style={{ marginBottom: 18 }}>
         <div className="stat-card">
           <h3>{t(lang, 'stats_top10')}</h3>
           <div className="list-rows">
-            {(stats?.top_seats_by_votes || []).map((s) => (
+            {(stats?.top_seats_by_votes || []).filter((s) => s.total_votes > 0).slice(0, 10).map((s) => (
               <div key={s.constituency_no} className="candidate-row" style={{ padding: '8px 10px' }}>
                 <span>{s.seat}</span>
                 <span>{s.total_votes}</span>
               </div>
             ))}
+            {(stats?.top_seats_by_votes || []).filter((s) => s.total_votes > 0).length === 0 ? (
+              <div className="small">No vote data yet.</div>
+            ) : null}
           </div>
         </div>
         <div className="stat-card compact">
@@ -284,14 +348,10 @@ export default function StatsPage({ lang }) {
               </div>
             ))}
           </div>
-          <div className="small" style={{ marginTop: 8 }}>Bars above use these colors.</div>
         </div>
       </div>
 
-      <div className="stats-grid">
-        <StatList title={t(lang, 'stats_seats_by_alliance')} data={stats?.seats_leading_by_alliance} />
-        <StatList title={t(lang, 'stats_seats_by_party')} data={stats?.seats_leading_by_party} />
-      </div>
+      
     </div>
   )
 }

@@ -103,7 +103,9 @@ def create_app():
             "_id": 0,
             "constituency_no": 1,
             "division": 1,
+            "division_bn": 1,
             "seat": 1,
+            "seat_bn": 1,
             "notes": 1,
             "is_disabled": 1,
         }).sort("constituency_no", 1)

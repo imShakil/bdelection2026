@@ -46,6 +46,7 @@ jobs:
           ssh ${{ secrets.SSH_USER }}@${{ env.GCP_VM_HOST }} << 'EOF'
             set -e
             cd ${{ env.GCP_APP_PATH }}
+            docker compose down
             docker compose pull || true
             docker compose up --build -d
           EOF
