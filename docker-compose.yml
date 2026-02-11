@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - RUN_IMPORT=0
+    depends_on:
+      - importer
+
+  importer:
+    build: ./backend
+    env_file:
+      - .env
+    environment:
+      - RUN_IMPORT=1
+      - CANDIDATES_CSV=/data/bd_elections_2026_candidates.csv
+    volumes:
+      - ./assets/bd_elections_2026_candidates.csv:/data/bd_elections_2026_candidates.csv:ro
+    restart: "no"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
