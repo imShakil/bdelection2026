@@ -3,10 +3,6 @@ name: Deploy to GCP VM
 on:
   push:
     branches: ["main"]
-    paths:
-      - ./backend
-      - ./frontend
-      - ./docker-compose.yml
   workflow_dispatch:
 
 env:
