@@ -244,7 +244,8 @@ export default function StatsPage({ lang }) {
         <div className="small">{loadingStats ? t(lang, 'stats_refreshing') : `${t(lang, 'stats_updated')} ${stats?.updated_at || ''}`}</div>
       </div>
 
-      <div className="kpi-grid" style={{ marginBottom: 18 }}>
+      <section className="section">
+        <div className="kpi-grid">
         <div className="kpi-card">
           <div className="kpi-label">{t(lang, 'stats_total_votes')}</div>
           <div className="kpi-value">{stats?.total_votes || 0}</div>
@@ -261,19 +262,11 @@ export default function StatsPage({ lang }) {
           <div className="kpi-label">{t(lang, 'stats_novotes')}</div>
           <div className="kpi-value">{noVotes}</div>
         </div>
-      </div>
+        </div>
+      </section>
 
-      <div className="stats-grid" style={{ marginBottom: 18 }}>
-        <BarList title={t(lang, 'stats_votes_by_alliance')} data={stats?.votes_by_alliance} />
-        <DonutChart title={t(lang, 'stats_votes_by_party')} data={stats?.votes_by_party} lang={lang} />
-      </div>
-
-      <div className="stats-grid">
-        <StatList title={t(lang, 'stats_seats_by_alliance')} data={stats?.seats_leading_by_alliance} />
-        <StatList title={t(lang, 'stats_seats_by_party')} data={stats?.seats_leading_by_party} />
-      </div>
-
-      <div className="page-grid" style={{ marginBottom: 18 }}>
+      <section className="section">
+      <div className="page-grid">
         <div className="card">
           <div className="panel-title">{t(lang, 'stats_search_title')}</div>
           <div className="panel-sub">{t(lang, 'stats_search_sub')}</div>
@@ -313,7 +306,7 @@ export default function StatsPage({ lang }) {
             <div className="list-rows" style={{ marginTop: 12 }}>
               {(stats?.top_seats_by_votes || []).slice(0, 5).map((s) => (
                 <div key={s.constituency_no} className="candidate-row" style={{ padding: '8px 10px' }}>
-                  <span>{s.seat}</span>
+                  <span>{lang === 'bn' && s.seat_bn ? s.seat_bn : s.seat}</span>
                   <span>{s.total_votes}</span>
                 </div>
               ))}
@@ -321,15 +314,23 @@ export default function StatsPage({ lang }) {
           </div>
         )}
       </div>
+      </section>
 
+      <section className="section">
+      <div className="stats-grid">
+        <BarList title={t(lang, 'stats_votes_by_alliance')} data={stats?.votes_by_alliance} />
+        <DonutChart title={t(lang, 'stats_votes_by_party')} data={stats?.votes_by_party} lang={lang} />
+      </div>
+      </section>
 
-      <div className="stats-grid" style={{ marginBottom: 18 }}>
+      <section className="section">
+      <div className="stats-grid">
         <div className="stat-card">
           <h3>{t(lang, 'stats_top10')}</h3>
           <div className="list-rows">
             {(stats?.top_seats_by_votes || []).filter((s) => s.total_votes > 0).slice(0, 10).map((s) => (
               <div key={s.constituency_no} className="candidate-row" style={{ padding: '8px 10px' }}>
-                <span>{s.seat}</span>
+                <span>{lang === 'bn' && s.seat_bn ? s.seat_bn : s.seat}</span>
                 <span>{s.total_votes}</span>
               </div>
             ))}
@@ -350,8 +351,14 @@ export default function StatsPage({ lang }) {
           </div>
         </div>
       </div>
+      </section>
 
-      
+      <section className="section">
+      <div className="stats-grid">
+        <StatList title={t(lang, 'stats_seats_by_alliance')} data={stats?.seats_leading_by_alliance} />
+        <StatList title={t(lang, 'stats_seats_by_party')} data={stats?.seats_leading_by_party} />
+      </div>
+      </section>
     </div>
   )
 }

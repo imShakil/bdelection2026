@@ -54,6 +54,14 @@ function AppShell() {
             <Route path="/news" element={<NewsPage lang={lang} />} />
           </Routes>
         </main>
+        <footer className="app-footer">
+          <div className="footer-left">{t(lang, 'brand_title')}</div>
+          <div className="footer-right">
+            <span>{t(lang, 'vote_notice_text')}</span>
+            <span className="footer-dot">•</span>
+            <span>{t(lang, 'brand_sub')}</span>
+          </div>
+        </footer>
       </div>
     </BrowserRouter>
   )
