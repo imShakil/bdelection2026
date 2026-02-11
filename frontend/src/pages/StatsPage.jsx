@@ -274,9 +274,9 @@ export default function StatsPage({ lang }) {
             ))}
           </div>
         </div>
-        <div className="stat-card">
+        <div className="stat-card compact">
           <h3>{t(lang, 'stats_legend')}</h3>
-          <div className="legend">
+          <div className="legend compact">
             {Object.keys(PARTY_COLORS).map((label) => (
               <div key={label} className="legend-item">
                 <span className="legend-swatch" style={{ background: PARTY_COLORS[label] }}></span>
@@ -284,6 +284,7 @@ export default function StatsPage({ lang }) {
               </div>
             ))}
           </div>
+          <div className="small" style={{ marginTop: 8 }}>Bars above use these colors.</div>
         </div>
       </div>
 

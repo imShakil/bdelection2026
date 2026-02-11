@@ -1,6 +1,6 @@
 const translations = {
   en: {
-    nav_vote: 'Vote',
+    nav_vote: 'Submit Vote',
     nav_stats: 'Stats',
     nav_news: 'Election News',
     brand_title: 'Bangladesh National Election - 2026',
@@ -48,7 +48,7 @@ const translations = {
     news_tip: 'Learn about candidates, compare policies, and vote for what is best for the country.'
   },
   bn: {
-    nav_vote: 'ভোট',
+    nav_vote: 'ভোট দিন',
     nav_stats: 'পরিসংখ্যান',
     nav_news: 'নির্বাচনীয় সংবাদ',
     brand_title: 'বাংলাদেশ জাতীয় নির্বাচন - ২০২৬',
