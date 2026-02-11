@@ -15,6 +15,7 @@ class Config:
     limiter_storage_uri: str
     redis_cache_url: str
     results_cache_ttl: int
+    news_cache_ttl: int
 
 
 def load_config() -> Config:
@@ -30,4 +31,5 @@ def load_config() -> Config:
         limiter_storage_uri=os.environ.get("LIMITER_STORAGE_URI", "memory://"),
         redis_cache_url=os.environ.get("REDIS_CACHE_URL", "redis://redis:6379/1"),
         results_cache_ttl=int(os.environ.get("RESULTS_CACHE_TTL", "10")),
+        news_cache_ttl=int(os.environ.get("NEWS_CACHE_TTL", "300")),
     )

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { apiGet } from '../api.js'
+import { t } from '../i18n.js'
 
 const STATS_CACHE_KEY = 'bd_stats_cache_v1'
 
@@ -41,11 +42,39 @@ function StatList({ title, data }) {
   )
 }
 
-function SeatResult({ seat, totals, loading }) {
+function BarList({ title, data }) {
+  const entries = Object.entries(data || {})
+  if (!entries.length) return null
+  const maxValue = Math.max(...entries.map(([, v]) => v))
+  return (
+    <div className="stat-card">
+      <h3>{title}</h3>
+      <div className="list-rows">
+        {entries.map(([key, value]) => {
+          const width = maxValue ? Math.round((value / maxValue) * 100) : 0
+          const color = PARTY_COLORS[key] || '#5b6066'
+          return (
+            <div key={key} className="bar-row">
+              <div className="bar-label">
+                <ColorBadge label={key} />
+                <span>{value}</span>
+              </div>
+              <div className="bar">
+                <div className="bar-fill" style={{ width: `${width}%`, background: color }}></div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function SeatResult({ seat, totals, loading, lang }) {
   if (loading) {
     return (
       <div className="stat-card">
-        <h3>Seat Result</h3>
+        <h3>{t(lang, 'stats_seat_result')}</h3>
         <div className="skeleton" style={{ height: 16, width: '70%', marginTop: 10 }}></div>
         <div className="skeleton" style={{ height: 12, width: '40%', marginTop: 10 }}></div>
         <div className="skeleton" style={{ height: 120, width: '100%', marginTop: 16 }}></div>
@@ -56,7 +85,7 @@ function SeatResult({ seat, totals, loading }) {
   const maxVotes = Math.max(0, ...Object.values(totals || {}))
   return (
     <div className="stat-card">
-      <h3>Seat Result</h3>
+      <h3>{t(lang, 'stats_seat_result')}</h3>
       <div className="panel-title" style={{ marginBottom: 6 }}>{seat.seat}</div>
       <div className="panel-sub">{seat.division} · Constituency #{seat.constituency_no}</div>
       <div className="candidate-list" style={{ marginTop: 10 }}>
@@ -78,7 +107,7 @@ function SeatResult({ seat, totals, loading }) {
   )
 }
 
-export default function StatsPage() {
+export default function StatsPage({ lang }) {
   const [stats, setStats] = useState(null)
   const [loadingStats, setLoadingStats] = useState(true)
   const [constituencies, setConstituencies] = useState([])
@@ -140,7 +169,7 @@ export default function StatsPage() {
   if (!stats && loadingStats) {
     return (
       <div className="card">
-        <div className="panel-title">Loading election dashboard...</div>
+        <div className="panel-title">{t(lang, 'stats_title')}</div>
         <div className="skeleton" style={{ height: 160, marginTop: 16 }}></div>
       </div>
     )
@@ -154,45 +183,45 @@ export default function StatsPage() {
     <div>
       <div className="section-head">
         <div>
-          <div className="panel-title">Election Dashboard</div>
-          <div className="panel-sub">Live tally snapshot with seat‑level detail.</div>
+          <div className="panel-title">{t(lang, 'stats_title')}</div>
+          <div className="panel-sub">{t(lang, 'stats_sub')}</div>
         </div>
-        <div className="small">{loadingStats ? 'Refreshing…' : `Updated at ${stats?.updated_at || ''}`}</div>
+        <div className="small">{loadingStats ? t(lang, 'stats_refreshing') : `${t(lang, 'stats_updated')} ${stats?.updated_at || ''}`}</div>
       </div>
 
       <div className="kpi-grid" style={{ marginBottom: 18 }}>
         <div className="kpi-card">
-          <div className="kpi-label">Total Votes</div>
+          <div className="kpi-label">{t(lang, 'stats_total_votes')}</div>
           <div className="kpi-value">{stats?.total_votes || 0}</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-label">Seats Reporting</div>
+          <div className="kpi-label">{t(lang, 'stats_reporting')}</div>
           <div className="kpi-value">{reporting}</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-label">Tied Seats</div>
+          <div className="kpi-label">{t(lang, 'stats_tied')}</div>
           <div className="kpi-value">{tied}</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-label">No Votes</div>
+          <div className="kpi-label">{t(lang, 'stats_novotes')}</div>
           <div className="kpi-value">{noVotes}</div>
         </div>
       </div>
 
       <div className="page-grid" style={{ marginBottom: 18 }}>
         <div className="card">
-          <div className="panel-title">Search seat results</div>
-          <div className="panel-sub">Type a seat name (e.g., Tangail-7).</div>
+          <div className="panel-title">{t(lang, 'stats_search_title')}</div>
+          <div className="panel-sub">{t(lang, 'stats_search_sub')}</div>
           <div className="map-controls" style={{ marginTop: 12 }}>
             <input
               className="input"
-              placeholder="Search seat name"
+              placeholder={t(lang, 'vote_search_placeholder')}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
           <div className="notice" style={{ marginTop: 12 }}>
-            {filtered.length} seats found
+            {filtered.length} {t(lang, 'vote_seats_found')}
           </div>
           <div className="candidate-list" style={{ marginTop: 12, maxHeight: 360, overflowY: 'auto' }}>
             {filtered.map((c) => (
@@ -208,12 +237,34 @@ export default function StatsPage() {
             ))}
           </div>
         </div>
-        <SeatResult seat={seatDetail} totals={seatDetail?.totals} loading={loadingSeat} />
+        {seatDetail || loadingSeat ? (
+          <SeatResult seat={seatDetail} totals={seatDetail?.totals} loading={loadingSeat} lang={lang} />
+        ) : (
+          <div className="stat-card">
+            <h3>{t(lang, 'stats_seat_result')}</h3>
+            <div className="panel-sub" style={{ marginTop: 6 }}>
+              {t(lang, 'stats_search_sub')}
+            </div>
+            <div className="list-rows" style={{ marginTop: 12 }}>
+              {(stats?.top_seats_by_votes || []).slice(0, 5).map((s) => (
+                <div key={s.constituency_no} className="candidate-row" style={{ padding: '8px 10px' }}>
+                  <span>{s.seat}</span>
+                  <span>{s.total_votes}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="stats-grid" style={{ marginBottom: 18 }}>
+        <BarList title={t(lang, 'stats_votes_by_alliance')} data={stats?.votes_by_alliance} />
+        <BarList title={t(lang, 'stats_votes_by_party')} data={stats?.votes_by_party} />
       </div>
 
       <div className="stats-grid" style={{ marginBottom: 18 }}>
         <div className="stat-card">
-          <h3>Top 10 Seats by Votes</h3>
+          <h3>{t(lang, 'stats_top10')}</h3>
           <div className="list-rows">
             {(stats?.top_seats_by_votes || []).map((s) => (
               <div key={s.constituency_no} className="candidate-row" style={{ padding: '8px 10px' }}>
@@ -224,7 +275,7 @@ export default function StatsPage() {
           </div>
         </div>
         <div className="stat-card">
-          <h3>Party Legend</h3>
+          <h3>{t(lang, 'stats_legend')}</h3>
           <div className="legend">
             {Object.keys(PARTY_COLORS).map((label) => (
               <div key={label} className="legend-item">
@@ -237,10 +288,8 @@ export default function StatsPage() {
       </div>
 
       <div className="stats-grid">
-        <StatList title="Votes by Alliance" data={stats?.votes_by_alliance} />
-        <StatList title="Votes by Party" data={stats?.votes_by_party} />
-        <StatList title="Seats Leading by Alliance" data={stats?.seats_leading_by_alliance} />
-        <StatList title="Seats Leading by Party" data={stats?.seats_leading_by_party} />
+        <StatList title={t(lang, 'stats_seats_by_alliance')} data={stats?.seats_leading_by_alliance} />
+        <StatList title={t(lang, 'stats_seats_by_party')} data={stats?.seats_leading_by_party} />
       </div>
     </div>
   )

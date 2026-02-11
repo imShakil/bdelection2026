@@ -10,6 +10,7 @@ from pymongo import ReturnDocument
 from pymongo.errors import DuplicateKeyError
 import json
 import redis
+import feedparser
 
 from config import load_config
 from db import get_db, ensure_indexes
@@ -348,6 +349,46 @@ def create_app():
         resp = make_response(json.dumps(payload))
         resp.mimetype = "application/json"
         return ensure_vid_cookie(resp)
+
+    @app.get("/api/news")
+    def news():
+        if cache:
+            try:
+                cached = cache.get("news_feed")
+                if cached:
+                    resp = make_response(cached)
+                    resp.mimetype = "application/json"
+                    return ensure_vid_cookie(resp)
+            except Exception:
+                pass
+
+        feeds = [
+            {"source": "BBC Bangla", "url": "https://feeds.bbci.co.uk/bengali/rss.xml"},
+            {"source": "Prothom Alo", "url": "https://www.prothomalo.com/feed/"},
+            {"source": "BanglaNews24", "url": "https://www.banglanews24.com/feed/"},
+        ]
+
+        items = []
+        for f in feeds:
+            parsed = feedparser.parse(f["url"])
+            for entry in parsed.entries[:6]:
+                items.append({
+                    "title": entry.get("title"),
+                    "link": entry.get("link"),
+                    "published": entry.get("published"),
+                    "source": f["source"],
+                })
+
+        payload = {"items": items[:15], "updated_at": now_utc().isoformat()}
+        if cache:
+            try:
+                cache.setex("news_feed", cfg.news_cache_ttl, json.dumps(payload))
+            except Exception:
+                pass
+        resp = make_response(json.dumps(payload))
+        resp.mimetype = "application/json"
+        return ensure_vid_cookie(resp)
+
 
     return app
 

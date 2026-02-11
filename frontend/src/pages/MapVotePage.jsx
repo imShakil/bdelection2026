@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { apiGet, apiPost } from '../api.js'
 import ConstituencyPanel from '../components/ConstituencyPanel.jsx'
 import CaptchaWidget from '../components/CaptchaWidget.jsx'
+import { t } from '../i18n.js'
 
 const PARTY_COLORS = {
   BNP: '#1b4b8f',
@@ -12,25 +13,25 @@ const PARTY_COLORS = {
   '11 Party Alliance': '#6b2f5f'
 }
 
-function ResultSummary({ seat, totals }) {
+function ResultSummary({ seat, totals, lang }) {
   if (!seat) return null
   const totalVotes = Object.values(totals || {}).reduce((a, b) => a + b, 0)
   const leader = seat.leader
-  let status = 'No votes yet'
-  if (seat.is_tied) status = 'Tied'
-  if (leader) status = `${leader.name} (${leader.party}) leading`
+  let status = t(lang, 'status_no_votes')
+  if (seat.is_tied) status = t(lang, 'status_tied')
+  if (leader) status = `${leader.name} (${leader.party}) ${t(lang, 'status_leading')}`
 
   return (
     <div className="card" style={{ marginTop: 16 }}>
-      <div className="panel-title">Result Summary</div>
+      <div className="panel-title">{t(lang, 'vote_receipt')}</div>
       <div className="panel-sub">{status}</div>
       <div className="kpi-row" style={{ marginTop: 12 }}>
         <div className="kpi">
-          <div className="kpi-label">Total Votes</div>
+          <div className="kpi-label">{t(lang, 'stats_total_votes')}</div>
           <div className="kpi-value">{totalVotes}</div>
         </div>
         <div className="kpi">
-          <div className="kpi-label">Constituency</div>
+          <div className="kpi-label">{t(lang, 'label_constituency')}</div>
           <div className="kpi-value">#{seat.constituency_no}</div>
         </div>
       </div>
@@ -46,7 +47,7 @@ function ResultSummary({ seat, totals }) {
   )
 }
 
-export default function MapVotePage() {
+export default function MapVotePage({ lang }) {
   const [constituencies, setConstituencies] = useState([])
   const [selectedId, setSelectedId] = useState(null)
   const [selectedDetail, setSelectedDetail] = useState(null)
@@ -97,12 +98,12 @@ export default function MapVotePage() {
         captcha_token: captchaToken
       })
       setTotals(res.new_tallies || {})
-      setMessage('Vote recorded. Thank you.')
+      setMessage(t(lang, 'vote_thanks'))
     } catch (err) {
       if (err.status === 409) {
-        setError('You already voted from this device/browser.')
+        setError(t(lang, 'vote_already'))
       } else {
-        setError(err.message || 'Vote failed')
+        setError(err.message || t(lang, 'vote_failed'))
       }
     }
   }
@@ -110,18 +111,18 @@ export default function MapVotePage() {
   return (
     <div className="page-grid">
       <div className="card sticky-column">
-        <div className="panel-title">Find your seat</div>
-        <div className="panel-sub">Search by seat name (e.g., Tangail-7).</div>
+        <div className="panel-title">{t(lang, 'vote_find_title')}</div>
+        <div className="panel-sub">{t(lang, 'vote_find_sub')}</div>
         <div className="map-controls" style={{ marginTop: 12 }}>
           <input
             className="input"
-            placeholder="Search seat name"
+            placeholder={t(lang, 'vote_search_placeholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
         <div className="notice" style={{ marginTop: 12 }}>
-          {filtered.length} seats found
+          {filtered.length} {t(lang, 'vote_seats_found')}
         </div>
         <div className="candidate-list" style={{ marginTop: 12, maxHeight: 520, overflowY: 'auto' }}>
           {filtered.map((c) => (
@@ -140,7 +141,7 @@ export default function MapVotePage() {
       <div>
         {loadingSeat && !selectedDetail ? (
           <div className="card">
-            <div className="panel-title">Loading seat details…</div>
+            <div className="panel-title">{t(lang, 'vote_loading_seat')}</div>
             <div className="skeleton" style={{ height: 140, marginTop: 12 }}></div>
           </div>
         ) : (
@@ -149,28 +150,38 @@ export default function MapVotePage() {
             selectedCandidate={selectedCandidate}
             onSelectCandidate={setSelectedCandidate}
             totals={totals}
+            lang={lang}
+            t={t}
           />
         )}
         {selectedDetail ? (
           <div className="card" style={{ marginTop: 16 }}>
-            <div className="panel-title">Cast Your Vote</div>
-            <div className="panel-sub">One vote per device · demo mode</div>
+            <div className="panel-title">{t(lang, 'vote_cast_title')}</div>
+            <div className="panel-sub">{t(lang, 'vote_cast_sub')}</div>
             <CaptchaWidget
               provider={captchaConfig.provider}
               siteKey={captchaConfig.siteKey}
               onToken={setCaptchaToken}
             />
             <button className="vote-btn" onClick={handleVote} disabled={voteDisabled}>
-              Submit Vote
+              {t(lang, 'vote_submit')}
             </button>
             {message ? <div className="toast">{message}</div> : null}
             {error ? <div className="notice">{error}</div> : null}
-            <div className="small" style={{ marginTop: 8 }}>
-              Why only one vote? This is a public demo with no identity verification.
-            </div>
+            <div className="small" style={{ marginTop: 8 }}>{t(lang, 'vote_why')}</div>
           </div>
         ) : null}
-        <ResultSummary seat={selectedDetail} totals={totals} />
+        <div className="steps card" style={{ marginTop: 16 }}>
+          <div className="panel-title">{t(lang, 'vote_steps_title')}</div>
+          <div className="step-row"><span className="step-dot"></span>{t(lang, 'vote_step1')}</div>
+          <div className="step-row"><span className="step-dot"></span>{t(lang, 'vote_step2')}</div>
+          <div className="step-row"><span className="step-dot"></span>{t(lang, 'vote_step3')}</div>
+        </div>
+        <div className="notice" style={{ marginTop: 16 }}>
+          <strong>{t(lang, 'vote_notice_title')}</strong>
+          <div className="small" style={{ marginTop: 6 }}>{t(lang, 'vote_notice_text')}</div>
+        </div>
+        <ResultSummary seat={selectedDetail} totals={totals} lang={lang} />
       </div>
     </div>
   )

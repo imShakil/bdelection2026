@@ -1,11 +1,11 @@
 import React from 'react'
 
-export default function ConstituencyPanel({ constituency, selectedCandidate, onSelectCandidate, totals }) {
+export default function ConstituencyPanel({ constituency, selectedCandidate, onSelectCandidate, totals, lang, t }) {
   if (!constituency) {
     return (
       <div className="card">
-        <div className="panel-title">Select a constituency</div>
-        <div className="panel-sub">Click a tile on the map to view candidates.</div>
+        <div className="panel-title">{t(lang, 'vote_find_title')}</div>
+        <div className="panel-sub">{t(lang, 'vote_find_sub')}</div>
       </div>
     )
   }
@@ -36,7 +36,7 @@ export default function ConstituencyPanel({ constituency, selectedCandidate, onS
           </label>
         ))}
         {!constituency.candidates ? (
-          <div className="small">Loading candidates...</div>
+          <div className="small">{t(lang, 'loading_candidates')}</div>
         ) : null}
       </div>
     </div>
