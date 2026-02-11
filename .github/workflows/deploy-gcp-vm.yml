@@ -42,6 +42,7 @@ jobs:
             --exclude ".git" \
             --exclude "node_modules" \
             --exclude "backend/.venv" \
+            --exclude ".env" \
             ./ ${{ secrets.SSH_USER }}@${{ env.GCP_VM_HOST }}:${{ env.GCP_APP_PATH }}
 
       - name: Deploy on VM
