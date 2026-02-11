@@ -7,12 +7,14 @@ services:
       - .env
     environment:
       - RUN_IMPORT=0
+      - MONGODB_URI=mongodb://mongo:27017/bd_elections_2026
       - LIMITER_STORAGE_URI=redis://redis:6379/0
       - REDIS_CACHE_URL=redis://redis:6379/1
       - RESULTS_CACHE_TTL=10
     depends_on:
       - importer
       - redis
+      - mongo
 
   importer:
     build: ./backend
@@ -20,17 +22,26 @@ services:
       - .env
     environment:
       - RUN_IMPORT=1
+      - MONGODB_URI=mongodb://mongo:27017/bd_elections_2026
       - CANDIDATES_CSV=/data/bd_elections_2026_candidates.csv
     volumes:
       - ./assets/bd_elections_2026_candidates.csv:/data/bd_elections_2026_candidates.csv:ro
     restart: "no"
     depends_on:
       - redis
+      - mongo
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
 
   frontend:
     build: ./frontend
@@ -38,3 +49,19 @@ services:
       - "5173:80"
     depends_on:
       - backend
+
+  migrator:
+    image: mongo:7
+    env_file:
+      - .env
+    environment:
+      - SOURCE_MONGODB_URI
+      - TARGET_MONGODB_URI
+    command: >
+      sh -c "mongodump --uri=$$SOURCE_MONGODB_URI --archive
+      | mongorestore --uri=$$TARGET_MONGODB_URI --archive --drop"
+    profiles:
+      - tools
+
+volumes:
+  mongo_data:

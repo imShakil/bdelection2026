@@ -28,6 +28,24 @@ This runs:
 - `backend` with Gunicorn on `http://localhost:8000`
 - `frontend` via Nginx on `http://localhost:5173`
 - `redis` for rate limiting
+- `mongo` for local MongoDB storage (volume `mongo_data`)
+
+## Migration (Anytime)
+
+Use the migrator service to copy data from any MongoDB to another.
+
+1. Set in `.env`:
+
+    ```bash
+    SOURCE_MONGODB_URI=...
+    TARGET_MONGODB_URI=...
+    ```
+
+2. Run:
+
+    ```bash
+    docker compose --profile tools run --rm migrator
+    ```
 
 ## Local Dev (Optional)
 
