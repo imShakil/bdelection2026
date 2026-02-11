@@ -359,6 +359,25 @@ export default function StatsPage({ lang }) {
         <StatList title={t(lang, 'stats_seats_by_party')} data={stats?.seats_leading_by_party} />
       </div>
       </section>
+
+      <section className="section">
+        <div className="stat-card">
+          <h3>{t(lang, 'stats_projection')}</h3>
+          <div className="small" style={{ marginTop: 6 }}>{t(lang, 'stats_projection_sub')}</div>
+          <div className="list-rows" style={{ marginTop: 12 }}>
+            {stats?.projection_by_party && Object.keys(stats.projection_by_party).length ? (
+              Object.entries(stats.projection_by_party).map(([party, seats]) => (
+                <div key={party} className="candidate-row" style={{ padding: '8px 10px' }}>
+                  <span>{party}</span>
+                  <span>{seats}</span>
+                </div>
+              ))
+            ) : (
+              <div className="small">Insufficient data for projection.</div>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   )
 }

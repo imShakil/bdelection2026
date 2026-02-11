@@ -166,8 +166,8 @@ def create_app():
         return ensure_vid_cookie(resp)
 
     @app.post("/api/vote")
-    @limiter.limit("5 per hour")
-    @limiter.limit("20 per day")
+    @limiter.limit("50 per hour")
+    @limiter.limit("100 per day")
     def vote():
         data = request.get_json(force=True) or {}
         constituency_no = data.get("constituency_no")
@@ -323,6 +323,28 @@ def create_app():
         top_seats = top_seats[:10]
 
         total_votes = sum(votes_by_party.values())
+        # Projection: allocate remaining seats by vote share (largest remainder)
+        seats_total = len(constituencies) - disabled_count
+        seats_current = sum(seats_leading_by_party.values())
+        remaining = max(0, seats_total - seats_current - tied - no_votes)
+        party_vote_entries = {k: v for k, v in votes_by_party.items() if v > 0}
+        projection = {}
+        if remaining > 0 and party_vote_entries:
+            total_party_votes = sum(party_vote_entries.values())
+            quotas = {}
+            remainders = []
+            for party, votes in party_vote_entries.items():
+                exact = (votes / total_party_votes) * remaining
+                base = int(exact)
+                quotas[party] = base
+                remainders.append((exact - base, party))
+            seats_allocated = sum(quotas.values())
+            remainders.sort(reverse=True)
+            for i in range(remaining - seats_allocated):
+                _, party = remainders[i]
+                quotas[party] += 1
+            projection = quotas
+
         payload = {
             "total_votes": total_votes,
             "votes_by_alliance": votes_by_alliance,
@@ -341,6 +363,13 @@ def create_app():
             "disabled_count": disabled_count,
             "leaders_by_constituency": leaders_by_constituency,
             "top_seats_by_votes": top_seats,
+            "projection_by_party": projection,
+            "projection_meta": {
+                "seats_total": seats_total,
+                "seats_current": seats_current,
+                "remaining": remaining,
+                "method": "vote_share_remaining_seats",
+            },
             "updated_at": now_utc().isoformat(),
         }
         if cache:
