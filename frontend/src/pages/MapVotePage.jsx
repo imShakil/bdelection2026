@@ -49,6 +49,7 @@ function ResultSummary({ seat, totals, lang }) {
 
 export default function MapVotePage({ lang }) {
   const detailRef = useRef(null)
+  const candidatePanelRef = useRef(null)
   const [constituencies, setConstituencies] = useState([])
   const [selectedId, setSelectedId] = useState(null)
   const [selectedDetail, setSelectedDetail] = useState(null)
@@ -82,6 +83,9 @@ export default function MapVotePage({ lang }) {
     if (!selectedId) return
     setSelectedDetail(null)
     setLoadingSeat(true)
+    if (window.matchMedia('(max-width: 720px)').matches) {
+      setShowSeatPicker(false)
+    }
     apiGet(`/api/constituencies/${selectedId}`).then((data) => {
       setSelectedDetail(data)
       setTotals(data.totals || {})
@@ -90,10 +94,13 @@ export default function MapVotePage({ lang }) {
       setError('')
       setLoadingSeat(false)
       if (window.matchMedia('(max-width: 720px)').matches) {
-        setShowSeatPicker(false)
-        setTimeout(() => {
-          detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        }, 0)
+        requestAnimationFrame(() => {
+          const target = candidatePanelRef.current || detailRef.current
+          if (!target) return
+          const headerOffset = 110
+          const top = target.getBoundingClientRect().top + window.scrollY - headerOffset
+          window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+        })
       }
     }).catch(() => setLoadingSeat(false))
   }, [selectedId])
@@ -176,14 +183,16 @@ export default function MapVotePage({ lang }) {
             <div className="skeleton" style={{ height: 140, marginTop: 12 }}></div>
           </div>
         ) : (
-          <ConstituencyPanel
-            constituency={selectedDetail}
-            selectedCandidate={selectedCandidate}
-            onSelectCandidate={setSelectedCandidate}
-            totals={totals}
-            lang={lang}
-            t={t}
-          />
+          <div ref={candidatePanelRef}>
+            <ConstituencyPanel
+              constituency={selectedDetail}
+              selectedCandidate={selectedCandidate}
+              onSelectCandidate={setSelectedCandidate}
+              totals={totals}
+              lang={lang}
+              t={t}
+            />
+          </div>
         )}
         {selectedDetail ? (
           <div className="card" style={{ marginTop: 16 }}>

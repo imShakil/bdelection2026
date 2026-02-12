@@ -21,8 +21,8 @@ export default function ConstituencyPanel({ constituency, selectedCandidate, onS
       ) : null}
       <div className="candidate-list">
         {(constituency.candidates || []).map((c) => (
-          <label className="candidate-row" key={c.candidate_id}>
-            <span>
+          <label className="candidate-row candidate-option" key={c.candidate_id}>
+            <span className="candidate-option-main">
               <input
                 type="radio"
                 name="candidate"
@@ -32,7 +32,7 @@ export default function ConstituencyPanel({ constituency, selectedCandidate, onS
               />{' '}
               {(lang === 'bn' && c.name_bn ? c.name_bn : c.name)} <span className="small">({(lang === 'bn' && c.party_bn ? c.party_bn : c.party)})</span>
             </span>
-            <span>{totals?.[c.candidate_id] || 0}</span>
+            <span className="candidate-option-votes">{totals?.[c.candidate_id] || 0}</span>
           </label>
         ))}
         {!constituency.candidates ? (

@@ -30,7 +30,7 @@ function StatList({ title, data }) {
       <h3>{title}</h3>
       <div className="list-rows">
         {entries.map(([key, value]) => (
-          <div key={key} className="candidate-row" style={{ padding: '8px 10px' }}>
+          <div key={key} className="candidate-row stats-row" style={{ padding: '8px 10px' }}>
             <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <ColorBadge label={key} />
             </span>
@@ -143,7 +143,7 @@ function SeatResult({ seat, totals, loading, lang }) {
           const value = totals?.[c.candidate_id] || 0
           const width = maxVotes ? Math.round((value / maxVotes) * 100) : 0
           return (
-            <div className="candidate-row" key={c.candidate_id}>
+            <div className="candidate-row stats-row" key={c.candidate_id}>
               <span>{(lang === 'bn' && c.name_bn ? c.name_bn : c.name)} <span className="small">({(lang === 'bn' && c.party_bn ? c.party_bn : c.party)})</span></span>
               <span>{value}</span>
               <div className="bar">
@@ -235,7 +235,7 @@ export default function StatsPage({ lang }) {
   const reporting = Math.max(0, (stats?.constituencies_count || 0) - (stats?.disabled_count || 0) - tied - noVotes)
 
   return (
-    <div>
+    <div className="stats-page">
       <div className="section-head">
         <div>
           <div className="panel-title">{t(lang, 'stats_title')}</div>
@@ -281,11 +281,11 @@ export default function StatsPage({ lang }) {
           <div className="notice" style={{ marginTop: 12 }}>
             {filtered.length} {t(lang, 'vote_seats_found')}
           </div>
-          <div className="candidate-list" style={{ marginTop: 12, maxHeight: 360, overflowY: 'auto' }}>
+          <div className="candidate-list stats-seat-list" style={{ marginTop: 12, maxHeight: 360, overflowY: 'auto' }}>
             {filtered.map((c) => (
               <button
                 key={c.constituency_no}
-                className="candidate-row"
+                className="candidate-row stats-row"
                 style={{ cursor: 'pointer', background: selectedId === c.constituency_no ? '#eef3fb' : '#fff' }}
                 onClick={() => setSelectedId(c.constituency_no)}
               >
@@ -305,7 +305,7 @@ export default function StatsPage({ lang }) {
             </div>
             <div className="list-rows" style={{ marginTop: 12 }}>
               {(stats?.top_seats_by_votes || []).slice(0, 5).map((s) => (
-                <div key={s.constituency_no} className="candidate-row" style={{ padding: '8px 10px' }}>
+                <div key={s.constituency_no} className="candidate-row stats-row" style={{ padding: '8px 10px' }}>
                   <span>{lang === 'bn' && s.seat_bn ? s.seat_bn : s.seat}</span>
                   <span>{s.total_votes}</span>
                 </div>
@@ -329,7 +329,7 @@ export default function StatsPage({ lang }) {
           <h3>{t(lang, 'stats_top10')}</h3>
           <div className="list-rows">
             {(stats?.top_seats_by_votes || []).filter((s) => s.total_votes > 0).slice(0, 10).map((s) => (
-              <div key={s.constituency_no} className="candidate-row" style={{ padding: '8px 10px' }}>
+              <div key={s.constituency_no} className="candidate-row stats-row" style={{ padding: '8px 10px' }}>
                 <span>{lang === 'bn' && s.seat_bn ? s.seat_bn : s.seat}</span>
                 <span>{s.total_votes}</span>
               </div>
@@ -367,7 +367,7 @@ export default function StatsPage({ lang }) {
           <div className="list-rows" style={{ marginTop: 12 }}>
             {stats?.projection_by_party && Object.keys(stats.projection_by_party).length ? (
               Object.entries(stats.projection_by_party).map(([party, seats]) => (
-                <div key={party} className="candidate-row" style={{ padding: '8px 10px' }}>
+                <div key={party} className="candidate-row stats-row" style={{ padding: '8px 10px' }}>
                   <span>{party}</span>
                   <span>{seats}</span>
                 </div>

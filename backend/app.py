@@ -32,7 +32,23 @@ def get_ip_prefix(ip: str) -> str:
 
 
 def now_utc():
-    return datetime.now(timezone.utc)
+    return datetime.now(timezone(timedelta(hours=6)))
+
+
+def feed_published_dhaka(entry):
+    parsed = entry.get("published_parsed")
+    if parsed:
+        dt_utc = datetime(
+            parsed.tm_year,
+            parsed.tm_mon,
+            parsed.tm_mday,
+            parsed.tm_hour,
+            parsed.tm_min,
+            parsed.tm_sec,
+            tzinfo=timezone.utc,
+        )
+        return dt_utc.astimezone(timezone(timedelta(hours=6))).isoformat()
+    return entry.get("published")
 
 
 def create_app():
@@ -397,6 +413,9 @@ def create_app():
             {"source": "BBC Bangla", "url": "https://feeds.bbci.co.uk/bengali/rss.xml"},
             {"source": "Prothom Alo", "url": "https://www.prothomalo.com/feed/"},
             {"source": "BanglaNews24", "url": "https://www.banglanews24.com/feed/"},
+            {"source": "Dhaka Tribune", "url": "https://www.dhakatribune.com/feed"},
+            {"source": "Jagonews24", "url": "https://www.jagonews24.com/rss/rss.xml"},
+            {"source": "BD24Live", "url": "https://www.bd24live.com/bangla/feed"},
         ]
 
         items = []
@@ -406,11 +425,11 @@ def create_app():
                 items.append({
                     "title": entry.get("title"),
                     "link": entry.get("link"),
-                    "published": entry.get("published"),
+                    "published": feed_published_dhaka(entry),
                     "source": f["source"],
                 })
 
-        payload = {"items": items[:15], "updated_at": now_utc().isoformat()}
+        payload = {"items": items[:24], "updated_at": now_utc().isoformat()}
         if cache:
             try:
                 cache.setex("news_feed", cfg.news_cache_ttl, json.dumps(payload))

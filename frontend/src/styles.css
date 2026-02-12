@@ -151,6 +151,10 @@ a { color: inherit; text-decoration: none; }
     max-height: 45vh !important;
     overflow-y: auto !important;
   }
+  .stats-seat-list {
+    max-height: 40vh !important;
+    overflow-y: auto !important;
+  }
   .donut-wrap {
     margin: 10px auto 0;
   }
@@ -180,6 +184,29 @@ a { color: inherit; text-decoration: none; }
   }
   .candidate-row span:last-child {
     align-self: flex-end;
+  }
+  .stats-page .candidate-row.stats-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+  .stats-page .candidate-row.stats-row span:last-child {
+    align-self: auto;
+  }
+  .stats-page .panel-sub {
+    line-height: 1.35;
+  }
+  .candidate-option {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .candidate-option-main {
+    flex: 1;
+    min-width: 0;
+  }
+  .candidate-option-votes {
+    align-self: auto;
   }
   .vote-btn {
     font-size: 14px;
@@ -234,6 +261,23 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid var(--line);
   border-radius: 10px;
   background: #fff;
+}
+
+.candidate-option {
+  align-items: center;
+}
+
+.candidate-option-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.35;
+}
+
+.candidate-option-votes {
+  min-width: 28px;
+  text-align: right;
+  font-weight: 600;
 }
 
 .vote-btn {
@@ -539,10 +583,16 @@ a { color: inherit; text-decoration: none; }
 }
 
 .sticky-column {
-  position: sticky;
-  top: 86px;
+  position: static;
   align-self: start;
   height: fit-content;
+}
+
+@media (min-width: 1200px) {
+  .sticky-column {
+    position: sticky;
+    top: 86px;
+  }
 }
 
 .small {
