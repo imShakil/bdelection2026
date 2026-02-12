@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { apiGet, apiPost } from '../api.js'
 import ConstituencyPanel from '../components/ConstituencyPanel.jsx'
 import CaptchaWidget from '../components/CaptchaWidget.jsx'
@@ -48,6 +48,7 @@ function ResultSummary({ seat, totals, lang }) {
 }
 
 export default function MapVotePage({ lang }) {
+  const detailRef = useRef(null)
   const [constituencies, setConstituencies] = useState([])
   const [selectedId, setSelectedId] = useState(null)
   const [selectedDetail, setSelectedDetail] = useState(null)
@@ -59,12 +60,22 @@ export default function MapVotePage({ lang }) {
   const [captchaToken, setCaptchaToken] = useState('')
   const [query, setQuery] = useState('')
   const [loadingSeat, setLoadingSeat] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [showSeatPicker, setShowSeatPicker] = useState(true)
 
   useEffect(() => {
     apiGet('/api/constituencies').then(setConstituencies)
     apiGet('/api/config').then((cfg) => {
       setCaptchaConfig({ provider: cfg.captcha_provider || 'none', siteKey: cfg.captcha_site_key || '' })
     })
+  }, [])
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 720px)')
+    const onChange = (e) => setIsMobile(e.matches)
+    setIsMobile(media.matches)
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
   }, [])
 
   useEffect(() => {
@@ -78,6 +89,12 @@ export default function MapVotePage({ lang }) {
       setMessage('')
       setError('')
       setLoadingSeat(false)
+      if (window.matchMedia('(max-width: 720px)').matches) {
+        setShowSeatPicker(false)
+        setTimeout(() => {
+          detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }, 0)
+      }
     }).catch(() => setLoadingSeat(false))
   }, [selectedId])
 
@@ -115,6 +132,7 @@ export default function MapVotePage({ lang }) {
 
   return (
     <div className="page-grid">
+      {(!isMobile || showSeatPicker) ? (
       <div className="card sticky-column">
         <div className="panel-title">{t(lang, 'vote_find_title')}</div>
         <div className="panel-sub">{t(lang, 'vote_find_sub')}</div>
@@ -129,7 +147,7 @@ export default function MapVotePage({ lang }) {
         <div className="notice" style={{ marginTop: 12 }}>
           {filtered.length} {t(lang, 'vote_seats_found')}
         </div>
-        <div className="candidate-list" style={{ marginTop: 12, maxHeight: 520, overflowY: 'auto' }}>
+        <div className="candidate-list seat-list" style={{ marginTop: 12, maxHeight: 520, overflowY: 'auto' }}>
           {filtered.map((c) => (
             <button
               key={c.constituency_no}
@@ -143,7 +161,15 @@ export default function MapVotePage({ lang }) {
           ))}
         </div>
       </div>
-      <div>
+      ) : null}
+      <div ref={detailRef}>
+        {isMobile && selectedDetail ? (
+          <div style={{ marginBottom: 10 }}>
+            <button className="vote-btn" style={{ marginTop: 0 }} onClick={() => setShowSeatPicker(true)}>
+              {lang === 'bn' ? 'আসন পরিবর্তন করুন' : 'Change Seat'}
+            </button>
+          </div>
+        ) : null}
         {loadingSeat && !selectedDetail ? (
           <div className="card">
             <div className="panel-title">{t(lang, 'vote_loading_seat')}</div>

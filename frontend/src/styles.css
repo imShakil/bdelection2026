@@ -147,8 +147,9 @@ a { color: inherit; text-decoration: none; }
   .sticky-column {
     position: static;
   }
-  .candidate-list {
-    max-height: none !important;
+  .seat-list {
+    max-height: 45vh !important;
+    overflow-y: auto !important;
   }
   .donut-wrap {
     margin: 10px auto 0;
