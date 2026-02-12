@@ -339,27 +339,48 @@ def create_app():
         top_seats = top_seats[:10]
 
         total_votes = sum(votes_by_party.values())
-        # Projection: allocate remaining seats by vote share (largest remainder)
+        # Projection: forecast final seats as current leads + unresolved seats by vote share.
         seats_total = len(constituencies) - disabled_count
         seats_current = sum(seats_leading_by_party.values())
-        remaining = max(0, seats_total - seats_current - tied - no_votes)
+        unresolved = tied + no_votes
         party_vote_entries = {k: v for k, v in votes_by_party.items() if v > 0}
         projection = {}
-        if remaining > 0 and party_vote_entries:
+        projection_from_unresolved = {}
+        if seats_current > 0:
+            projection = {k: v for k, v in seats_leading_by_party.items() if v > 0}
+        if unresolved > 0 and party_vote_entries:
             total_party_votes = sum(party_vote_entries.values())
             quotas = {}
             remainders = []
             for party, votes in party_vote_entries.items():
-                exact = (votes / total_party_votes) * remaining
+                exact = (votes / total_party_votes) * unresolved
                 base = int(exact)
                 quotas[party] = base
-                remainders.append((exact - base, party))
+                remainders.append((exact - base, votes, party))
             seats_allocated = sum(quotas.values())
-            remainders.sort(reverse=True)
-            for i in range(remaining - seats_allocated):
-                _, party = remainders[i]
+            remainders.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
+            for i in range(unresolved - seats_allocated):
+                _, _, party = remainders[i]
                 quotas[party] += 1
-            projection = quotas
+            projection_from_unresolved = quotas
+            for party, seats in quotas.items():
+                projection[party] = projection.get(party, 0) + seats
+
+        projected_winner = {
+            "party": None,
+            "seats": 0,
+            "is_tied": False,
+            "tied_parties": [],
+        }
+        if projection:
+            max_seats = max(projection.values())
+            top_parties = sorted([party for party, seats in projection.items() if seats == max_seats])
+            projected_winner = {
+                "party": top_parties[0] if len(top_parties) == 1 else None,
+                "seats": max_seats,
+                "is_tied": len(top_parties) > 1,
+                "tied_parties": top_parties if len(top_parties) > 1 else [],
+            }
 
         payload = {
             "total_votes": total_votes,
@@ -383,9 +404,12 @@ def create_app():
             "projection_meta": {
                 "seats_total": seats_total,
                 "seats_current": seats_current,
-                "remaining": remaining,
-                "method": "vote_share_remaining_seats",
+                "remaining": unresolved,
+                "current_leads_by_party": seats_leading_by_party,
+                "estimated_from_unresolved_by_party": projection_from_unresolved,
+                "method": "current_leads_plus_vote_share_unresolved",
             },
+            "projected_winner": projected_winner,
             "updated_at": now_utc().isoformat(),
         }
         if cache:

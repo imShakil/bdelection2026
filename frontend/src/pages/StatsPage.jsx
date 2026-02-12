@@ -221,6 +221,28 @@ export default function StatsPage({ lang }) {
     })
   }, [query, constituencies])
 
+  const projectionEntries = useMemo(() => {
+    const entries = Object.entries(stats?.projection_by_party || {})
+    return entries.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  }, [stats])
+
+  const projectedWinnerText = useMemo(() => {
+    if (!projectionEntries.length) return ''
+    const winner = stats?.projected_winner
+    if (winner?.is_tied && winner?.tied_parties?.length) {
+      return `${t(lang, 'stats_projection_tie')}: ${winner.tied_parties.join(', ')} (${winner.seats})`
+    }
+    if (winner?.party) {
+      return `${t(lang, 'stats_projected_winner')}: ${winner.party} (${winner.seats})`
+    }
+    const topSeats = projectionEntries[0][1]
+    const topParties = projectionEntries.filter(([, seats]) => seats === topSeats).map(([party]) => party)
+    if (topParties.length > 1) {
+      return `${t(lang, 'stats_projection_tie')}: ${topParties.join(', ')} (${topSeats})`
+    }
+    return `${t(lang, 'stats_projected_winner')}: ${topParties[0]} (${topSeats})`
+  }, [lang, projectionEntries, stats])
+
   if (!stats && loadingStats) {
     return (
       <div className="card">
@@ -364,16 +386,19 @@ export default function StatsPage({ lang }) {
         <div className="stat-card">
           <h3>{t(lang, 'stats_projection')}</h3>
           <div className="small" style={{ marginTop: 6 }}>{t(lang, 'stats_projection_sub')}</div>
+          {projectedWinnerText ? (
+            <div className="panel-title" style={{ marginTop: 10 }}>{projectedWinnerText}</div>
+          ) : null}
           <div className="list-rows" style={{ marginTop: 12 }}>
-            {stats?.projection_by_party && Object.keys(stats.projection_by_party).length ? (
-              Object.entries(stats.projection_by_party).map(([party, seats]) => (
+            {projectionEntries.length ? (
+              projectionEntries.map(([party, seats]) => (
                 <div key={party} className="candidate-row stats-row" style={{ padding: '8px 10px' }}>
                   <span>{party}</span>
                   <span>{seats}</span>
                 </div>
               ))
             ) : (
-              <div className="small">Insufficient data for projection.</div>
+              <div className="small">{t(lang, 'stats_projection_insufficient')}</div>
             )}
           </div>
         </div>
