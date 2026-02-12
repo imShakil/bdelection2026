@@ -4,10 +4,19 @@ import { t } from '../i18n.js'
 
 export default function NewsPage({ lang }) {
   const [news, setNews] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    apiGet('/api/news').then(setNews)
-  }, [])
+    setLoading(true)
+    setError('')
+    apiGet('/api/news')
+      .then((data) => setNews(data))
+      .catch(() => {
+        setError(lang === 'bn' ? 'সংবাদ লোড করা যায়নি।' : 'Failed to load news.')
+      })
+      .finally(() => setLoading(false))
+  }, [lang])
 
   return (
     <div>
@@ -21,14 +30,27 @@ export default function NewsPage({ lang }) {
 
       <div className="stat-card" style={{ marginBottom: 18 }}>
         <h3>{t(lang, 'news_headlines')}</h3>
-        <div className="list-rows">
-          {(news?.items || []).map((item, idx) => (
-            <a key={`${item.link}-${idx}`} className="news-item" href={item.link} target="_blank" rel="noreferrer">
-              <div className="news-title">{item.title}</div>
-              <div className="small">{item.source} · {item.published || ''}</div>
-            </a>
-          ))}
-        </div>
+        {loading ? (
+          <div className="list-rows">
+            <div className="skeleton" style={{ height: 60 }}></div>
+            <div className="skeleton" style={{ height: 60 }}></div>
+            <div className="skeleton" style={{ height: 60 }}></div>
+          </div>
+        ) : null}
+        {!loading && error ? <div className="notice">{error}</div> : null}
+        {!loading && !error ? (
+          <div className="list-rows">
+            {(news?.items || []).map((item, idx) => (
+              <a key={`${item.link}-${idx}`} className="news-item" href={item.link} target="_blank" rel="noreferrer">
+                <div className="news-title">{item.title}</div>
+                <div className="small">{item.source} · {item.published || ''}</div>
+              </a>
+            ))}
+            {(news?.items || []).length === 0 ? (
+              <div className="small">{lang === 'bn' ? 'কোনো সংবাদ পাওয়া যায়নি।' : 'No news items found.'}</div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <div className="card">
