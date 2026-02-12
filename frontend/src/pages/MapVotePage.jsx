@@ -220,7 +220,9 @@ export default function MapVotePage({ lang }) {
         <ResultSummary seat={selectedDetail} totals={totals} lang={lang} />
          <div className="notice" style={{ marginTop: 16 }}>
           <strong>{t(lang, 'vote_notice_title')}</strong>
-          <div className="small" style={{ marginTop: 6 }}>{t(lang, 'vote_notice_text')}</div>
+          <div className="small" style={{ marginTop: 6, whiteSpace: 'pre-line' }}>
+            {t(lang, 'vote_notice_description')}
+          </div>
         </div>
       </div>
     </div>
