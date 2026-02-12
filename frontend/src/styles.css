@@ -79,12 +79,13 @@ a { color: inherit; text-decoration: none; }
   border-top: 1px solid var(--line);
   background: #fff;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 6px;
   color: var(--muted);
   font-size: 12px;
+  text-align: center;
 }
 
 @media (max-width: 720px) {
@@ -102,6 +103,7 @@ a { color: inherit; text-decoration: none; }
   display: flex;
   gap: 8px;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
 }
 
@@ -148,7 +150,7 @@ a { color: inherit; text-decoration: none; }
     position: static;
   }
   .seat-list {
-    max-height: 45vh !important;
+    max-height: 40vh !important;
     overflow-y: auto !important;
   }
   .stats-seat-list {
@@ -193,6 +195,14 @@ a { color: inherit; text-decoration: none; }
   .stats-page .candidate-row.stats-row span:last-child {
     align-self: auto;
   }
+  .seat-list .candidate-row.stats-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+  .seat-list .candidate-row.stats-row span:last-child {
+    align-self: auto;
+  }
   .stats-page .panel-sub {
     line-height: 1.35;
   }
@@ -223,7 +233,7 @@ a { color: inherit; text-decoration: none; }
   }
   .footer-right {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
   }
 }
 

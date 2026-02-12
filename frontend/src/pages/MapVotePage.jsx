@@ -158,7 +158,7 @@ export default function MapVotePage({ lang }) {
           {filtered.map((c) => (
             <button
               key={c.constituency_no}
-              className="candidate-row"
+              className="candidate-row stats-row"
               style={{ cursor: 'pointer', background: selectedId === c.constituency_no ? '#eef3fb' : '#fff' }}
               onClick={() => setSelectedId(c.constituency_no)}
             >
