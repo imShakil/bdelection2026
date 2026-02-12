@@ -371,19 +371,7 @@ export default function StatsPage({ lang }) {
               </div>
             ))}
           </div>
-        </div>
-      </div>
-      </section>
-
-      <section className="section">
-      <div className="stats-grid">
-        <StatList title={t(lang, 'stats_seats_by_alliance')} data={stats?.seats_leading_by_alliance} />
-        <StatList title={t(lang, 'stats_seats_by_party')} data={stats?.seats_leading_by_party} />
-      </div>
-      </section>
-
-      <section className="section">
-        <div className="stat-card">
+          <hr />
           <h3>{t(lang, 'stats_projection')}</h3>
           <div className="small" style={{ marginTop: 6 }}>{t(lang, 'stats_projection_sub')}</div>
           {projectedWinnerText ? (
@@ -402,6 +390,18 @@ export default function StatsPage({ lang }) {
             )}
           </div>
         </div>
+      </div>
+      </section>
+
+      <section className="section">
+      <div className="stats-grid">
+        <StatList title={t(lang, 'stats_seats_by_alliance')} data={stats?.seats_leading_by_alliance} />
+        <StatList title={t(lang, 'stats_seats_by_party')} data={stats?.seats_leading_by_party} />
+      </div>
+      </section>
+
+      <section className="section">
+        
       </section>
     </div>
   )
