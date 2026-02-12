@@ -361,7 +361,7 @@ export default function StatsPage({ lang }) {
             ) : null}
           </div>
         </div>
-        <div className="stat-card compact">
+        <div className="stat-card">
           <h3>{t(lang, 'stats_legend')}</h3>
           <div className="legend compact">
             {Object.keys(PARTY_COLORS).map((label) => (
