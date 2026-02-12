@@ -45,7 +45,7 @@ const translations = {
     news_sub: 'Latest headlines and a light moment.',
     news_headlines: 'Latest Headlines',
     news_comic: 'Comic of the Day',
-    news_disclaimer: 'Sources are external news outlets. This is a demo view only.',
+    news_disclaimer: 'Sources are external news outlets.',
     news_fun: 'Civic Tip',
     news_tip: 'Learn about candidates, compare policies, and vote for what is best for the country.'
   },
