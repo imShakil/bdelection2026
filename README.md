@@ -96,3 +96,9 @@ npm run dev
 ## Notes
 
 The map is rendered as a **tile map** for the MVP. If you add a real Bangladesh constituency GeoJSON or SVG mapping file, the map component can be extended to use it.
+
+## Screenshots
+
+![dashboard](./assets/dashboard.png)
+![vote-submit](./assets/finding-seats-and-submit-vote.png)
+![read-news](./assets/read-relevant-news.png)
