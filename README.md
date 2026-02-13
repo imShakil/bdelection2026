@@ -1,6 +1,6 @@
-# Bangladesh Map Voting (MVP)
+# Bangladesh National Election - 2026 (Online Voting)
 
-A public demo web app that lets users vote for candidates by constituency on a Bangladesh constituency map (tile view). Votes are stored in MongoDB Atlas. This is a **best‑effort** deterrence demo with no identity verification.
+A public demo web app that lets users vote for candidates by constituency on a Bangladesh constituency. Votes are stored in MongoDB Atlas. This is a **best‑effort** deterrence demo with no identity verification.
 
 ## What’s Included
 
