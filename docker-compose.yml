@@ -27,8 +27,8 @@ services:
       - CANDIDATES_CSV=/data/bd_elections_2026_candidates.csv
       - CANDIDATES_BN_CSV=/data/bd_candidates_bn.csv
     volumes:
-      - ./bd_elections_2026_candidates.csv:/data/bd_elections_2026_candidates.csv:ro
-      - ./bd_candidates_bn.csv:/data/bd_candidates_bn.csv:ro
+      - ./assets/bd_elections_2026_candidates.csv:/data/bd_elections_2026_candidates.csv:ro
+      - ./assets/bd_candidates_bn.csv:/data/bd_candidates_bn.csv:ro
     restart: "no"
     depends_on:
       - redis
