@@ -3,6 +3,7 @@ import { apiGet } from '../api.js'
 import { t } from '../i18n.js'
 
 const STATS_CACHE_KEY = 'bd_stats_cache_v1'
+const EXTERNAL_RESULTS_URL = 'https://election.bdnews24.com/api/election-tally'
 
 const PARTY_COLORS = {
   BNP: '#1b4b8f',
@@ -267,7 +268,28 @@ export default function StatsPage({ lang }) {
       </div>
 
       <section className="section">
-        <div className="kpi-grid">
+      <div className="stat-card results-iframe-card">
+        <h3>Official Election Result Feed</h3>
+        <div className="panel-sub" style={{ marginTop: 0, marginBottom: 10 }}>
+        </div>
+        <div className="results-iframe-wrap">
+          <iframe
+            className="results-iframe"
+            title="Election Results"
+            src={EXTERNAL_RESULTS_URL}
+            loading="lazy"
+
+            referrerPolicy="no-referrer-when-downgrade"
+            
+          />
+        </div>
+        <div className="small" style={{ marginTop: 10 }}>
+        </div>
+      </div>
+      </section>
+
+      <section className="section">
+      <div className="kpi-grid">
         <div className="kpi-card">
           <div className="kpi-label">{t(lang, 'stats_total_votes')}</div>
           <div className="kpi-value">{stats?.total_votes || 0}</div>
@@ -398,10 +420,6 @@ export default function StatsPage({ lang }) {
         <StatList title={t(lang, 'stats_seats_by_alliance')} data={stats?.seats_leading_by_alliance} />
         <StatList title={t(lang, 'stats_seats_by_party')} data={stats?.seats_leading_by_party} />
       </div>
-      </section>
-
-      <section className="section">
-        
       </section>
     </div>
   )
